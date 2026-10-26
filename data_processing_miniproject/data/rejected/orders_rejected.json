@@ -1,0 +1,98 @@
+[
+  {
+    "row_number": 32,
+    "order_id": "O1031",
+    "payload": {
+      "order_id": "O1031",
+      "customer_id": "C026",
+      "order_ts": "2026-09-11T09:00:00+00:00",
+      "product_category": "Books",
+      "quantity": 0,
+      "unit_price": 15.0,
+      "discount_pct": 0.0,
+      "payment_method": "card",
+      "status": "paid"
+    },
+    "error": "1 validation error for Order\nquantity\n  Input should be greater than 0 [type=greater_than, input_value=0, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.14/v/greater_than"
+  },
+  {
+    "row_number": 33,
+    "order_id": "O1032",
+    "payload": {
+      "order_id": "O1032",
+      "customer_id": "C027",
+      "order_ts": "2026-09-11T10:00:00+00:00",
+      "product_category": "Fashion",
+      "quantity": 1,
+      "unit_price": -12.0,
+      "discount_pct": 0.0,
+      "payment_method": "ewallet",
+      "status": "paid"
+    },
+    "error": "1 validation error for Order\nunit_price\n  Input should be greater than or equal to 0 [type=greater_than_equal, input_value=-12.0, input_type=float]\n    For further information visit https://errors.pydantic.dev/2.14/v/greater_than_equal"
+  },
+  {
+    "row_number": 34,
+    "order_id": "O1033",
+    "payload": {
+      "order_id": "O1033",
+      "customer_id": "C028",
+      "order_ts": "2026-09-11T11:00:00+00:00",
+      "product_category": "Electronics",
+      "quantity": 1,
+      "unit_price": 99.0,
+      "discount_pct": 1.2,
+      "payment_method": "card",
+      "status": "paid"
+    },
+    "error": "1 validation error for Order\ndiscount_pct\n  Input should be less than or equal to 1 [type=less_than_equal, input_value=1.2, input_type=float]\n    For further information visit https://errors.pydantic.dev/2.14/v/less_than_equal"
+  },
+  {
+    "row_number": 35,
+    "order_id": "O1035",
+    "payload": {
+      "order_id": "O1035",
+      "customer_id": "C030",
+      "order_ts": "2026-09-11T14:00:00+00:00",
+      "product_category": "Books",
+      "quantity": 2,
+      "unit_price": 20.0,
+      "discount_pct": 0.0,
+      "payment_method": "card",
+      "status": "pending"
+    },
+    "error": "1 validation error for Order\nstatus\n  Input should be 'paid', 'shipped', 'cancelled' or 'refunded' [type=literal_error, input_value='pending', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.14/v/literal_error"
+  },
+  {
+    "row_number": 36,
+    "order_id": "O1036",
+    "payload": {
+      "order_id": "O1036",
+      "customer_id": null,
+      "order_ts": "2026-09-11T15:00:00+00:00",
+      "product_category": "Fashion",
+      "quantity": 1,
+      "unit_price": 30.0,
+      "discount_pct": 0.0,
+      "payment_method": "ewallet",
+      "status": "paid"
+    },
+    "error": "Field wajib kosong: customer_id"
+  },
+  {
+    "row_number": 37,
+    "order_id": "O1034",
+    "payload": {
+      "order_id": "O1034",
+      "customer_id": "C029",
+      "order_ts": null,
+      "product_category": "Home",
+      "quantity": 1,
+      "unit_price": 50.0,
+      "discount_pct": 0.0,
+      "payment_method": "transfer",
+      "status": "paid"
+    },
+    "error": "Field wajib kosong: order_ts"
+  }
+]

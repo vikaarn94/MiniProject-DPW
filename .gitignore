@@ -1,0 +1,25 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# dbt
+data_processing_miniproject/dbt_project/target/
+data_processing_miniproject/dbt_project/logs/
+data_processing_miniproject/dbt_project/.user.yml
+
+# Generated data / warehouse
+*.duckdb
+*.duckdb.wal
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.env

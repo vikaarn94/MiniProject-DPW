@@ -1,0 +1,9 @@
+
+ecommerce_warehouse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "data/warehouse/ecommerce_dbt.duckdb"
+      schema: main
+      threads: 1
