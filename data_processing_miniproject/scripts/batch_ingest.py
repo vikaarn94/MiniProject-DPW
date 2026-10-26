@@ -1,53 +1,61 @@
-
 import argparse
 import json
-import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+from retry_utils import TransientSourceError, with_retry
 
 
-def get_page(df, page, page_size, retries=3):
-    """Membaca satu halaman data dari CSV lokal."""
+class CsvPageSource:
+    """Sumber halaman dari CSV lokal yang mensimulasikan REST API berpagination.
 
-    for attempt in range(retries):
-        try:
-            start = page * page_size
-            end = start + page_size
+    simulate_failures=N membuat N panggilan fetch pertama melempar
+    TransientSourceError (setara HTTP 503/timeout) agar retry bisa dibuktikan.
+    """
 
-            return df.iloc[start:end].copy()
+    def __init__(self, df, simulate_failures=0):
+        self.df = df
+        self.remaining_failures = simulate_failures
 
-        except Exception:
-            if attempt == retries - 1:
-                raise
+    def fetch(self, page, page_size):
+        if self.remaining_failures > 0:
+            self.remaining_failures -= 1
+            raise TransientSourceError("503 Service Unavailable (simulasi)")
 
-            wait_time = 2 ** attempt
-            print(f"Retry dalam {wait_time} detik...")
-            time.sleep(wait_time)
+        start = page * page_size
+        return self.df.iloc[start:start + page_size].copy()
+
+
+def get_page(source, page, page_size, max_attempts=4, base_delay=1.0, sleep=None):
+    """Ambil satu halaman dengan retry + exponential backoff."""
+    kwargs = {"max_attempts": max_attempts, "base_delay": base_delay}
+
+    if sleep is not None:
+        kwargs["sleep"] = sleep
+
+    return with_retry(lambda: source.fetch(page, page_size), **kwargs)
 
 
 def main():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("--source", default="data/orders.csv")
+    parser.add_argument("--out", default="data/raw")
+    parser.add_argument("--page-size", type=int, default=10)
+    parser.add_argument("--checkpoint", default="data/watermark.json")
     parser.add_argument(
-        "--source",
-        default="data/orders.csv"
-    )
-
-    parser.add_argument(
-        "--out",
-        default="data/raw"
-    )
-
-    parser.add_argument(
-        "--page-size",
+        "--simulate-failures",
         type=int,
-        default=10
+        default=0,
+        help="jumlah kegagalan sementara yang disimulasikan sebelum sukses",
     )
-
+    parser.add_argument("--max-attempts", type=int, default=4)
+    parser.add_argument("--base-delay", type=float, default=1.0)
     parser.add_argument(
-        "--checkpoint",
-        default="data/watermark.json"
+        "--log",
+        default="data/raw/ingestion_log.jsonl",
+        help="file JSON-lines berisi ringkasan tiap eksekusi",
     )
 
     args = parser.parse_args()
@@ -86,14 +94,20 @@ def main():
         )
         last_watermark = checkpoint.get("watermark")
 
+    source = CsvPageSource(df, simulate_failures=args.simulate_failures)
+
     pages = []
     page = 0
 
     while True:
+        print(f"Mengambil halaman {page + 1}...")
+
         chunk = get_page(
-            df,
+            source,
             page,
-            args.page_size
+            args.page_size,
+            max_attempts=args.max_attempts,
+            base_delay=args.base_delay,
         )
 
         if chunk.empty:
@@ -137,6 +151,7 @@ def main():
             ignore_index=True
         )
     else:
+        old_rows = None
         combined = new_rows.copy()
 
     # Deduplikasi berdasarkan ID pesanan.
@@ -153,6 +168,7 @@ def main():
 
     # Simpan watermark hanya setelah penulisan sukses.
     valid_timestamps = combined["order_ts"].dropna()
+    new_watermark = None
 
     if not valid_timestamps.empty:
         new_watermark = valid_timestamps.max().isoformat()
@@ -170,12 +186,38 @@ def main():
             encoding="utf-8"
         )
 
+    total_before = 0 if old_rows is None else len(old_rows)
+    added = len(combined) - total_before
+
+    summary = {
+        "run_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "pages": page,
+        "read": len(extracted),
+        "passed_watermark_filter": len(new_rows),
+        "added": added,
+        "total_before": total_before,
+        "total_unique": len(combined),
+        "watermark_before": last_watermark,
+        "watermark_after": new_watermark,
+    }
+
+    log_path = Path(args.log)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with log_path.open("a", encoding="utf-8") as log_file:
+        log_file.write(json.dumps(summary) + "\n")
+
     print("\n=== HASIL BATCH INGESTION ===")
-    print("Total sumber :", len(df))
-    print("Record baru  :", len(new_rows))
-    print("Total unik   :", len(combined))
-    print("Output       :", target_path)
-    print("Watermark    :", new_watermark if not valid_timestamps.empty else "Belum tersedia")
+    print("Halaman dibaca       :", page)
+    print("Record dibaca        :", len(extracted))
+    print("Lolos filter watermark:", len(new_rows))
+    print("Record ditambahkan   :", added)
+    print("Total unik sebelum   :", total_before)
+    print("Total unik sesudah   :", len(combined))
+    print("Output               :", target_path)
+    print("Watermark sebelum    :", last_watermark or "-")
+    print("Watermark sesudah    :", new_watermark or "Belum tersedia")
+    print("Log eksekusi         :", log_path)
 
 
 if __name__ == "__main__":

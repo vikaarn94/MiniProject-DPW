@@ -1,14 +1,14 @@
 
 import json
+import os
 import time
 from pathlib import Path
 
 import pandas as pd
 from kafka import KafkaProducer
 
-
-BOOTSTRAP_SERVERS = "localhost:9092"
-TOPIC = "orders"
+BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+TOPIC = os.getenv("KAFKA_TOPIC", "orders")
 SOURCE = Path("data/orders.csv")
 
 

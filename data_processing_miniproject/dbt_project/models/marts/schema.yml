@@ -38,3 +38,14 @@ models:
               arguments:
                 to: ref('dim_product_category')
                 field: product_category
+
+      - name: status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['paid', 'shipped', 'cancelled', 'refunded']
+
+      - name: net_amount
+        data_tests:
+          - not_null

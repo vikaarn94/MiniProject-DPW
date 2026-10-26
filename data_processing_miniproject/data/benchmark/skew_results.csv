@@ -1,0 +1,9 @@
+experiment,label,rows,customers,dominant_customer,dominant_rows,dominant_share,engine,median_s
+dup_original,normal,30,25,C001,4,0.1333,pandas,0.00333
+dup_original,skewed_dup,170,25,C001,40,0.2353,pandas,0.002689
+equal_rows,uniform,1000000,10000,C000747,141,0.0001,pandas,0.10449
+equal_rows,uniform,1000000,10000,C000747,141,0.0001,polars,0.019686
+equal_rows,skew_50pct,1000000,10000,C000000,499885,0.4999,pandas,0.108203
+equal_rows,skew_50pct,1000000,10000,C000000,499885,0.4999,polars,0.020869
+equal_rows,skew_90pct,1000000,9999,C000000,900232,0.9002,pandas,0.106915
+equal_rows,skew_90pct,1000000,9999,C000000,900232,0.9002,polars,0.022335

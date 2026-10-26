@@ -1,0 +1,37 @@
+﻿--- producer
+Event terkirim | order_id=O1020 | partition=2 | offset=31
+Selesai mengirim 20 event.
+--- send duplicate x2
+Offset   : 32
+------------------------------
+Event ke-2 berhasil dikirim
+Order ID : TEST-DUPLICATE-001
+Partition: 2
+Offset   : 33
+------------------------------
+Pengujian duplikasi selesai.
+--- consumer run 1
+DUPLIKAT (diabaikan): O1016 | partition=0 | offset=19
+DUPLIKAT (diabaikan): O1017 | partition=0 | offset=20
+=== RINGKASAN CONSUMER ===
+Pesan dibaca  : 64
+Valid (baru)  : 21
+Duplikat      : 43
+Rejected      : 0
+Baris di sink : 21
+File valid    : data\stream\valid.jsonl
+File duplikat : data\stream\duplicates.jsonl
+File rejected : data\stream\rejected.jsonl
+--- redelivery: kirim duplikat lagi, consumer run 2 (group sama)
+=== RINGKASAN CONSUMER ===
+Pesan dibaca  : 2
+Valid (baru)  : 0
+Duplikat      : 2
+Rejected      : 0
+Baris di sink : 21
+File valid    : data\stream\valid.jsonl
+File duplikat : data\stream\duplicates.jsonl
+File rejected : data\stream\rejected.jsonl
+--- query sink (DuckDB, stream_orders)
+baris total, order_id unik : [(21, 21)]
+TEST-DUPLICATE-001 di sink  : 1 baris (partition 2, offset 20 = event pertama)

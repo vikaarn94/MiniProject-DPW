@@ -1,0 +1,14 @@
+{
+  "total_input": 36,
+  "valid": 30,
+  "rejected": 6,
+  "reconciled": true,
+  "rejected_by_reason": {
+    "quantity:greater_than": 1,
+    "unit_price:greater_than_equal": 1,
+    "discount_pct:less_than_equal": 1,
+    "status:literal_error": 1,
+    "customer_id:missing": 1,
+    "order_ts:missing": 1
+  }
+}
