@@ -20,7 +20,11 @@ producer.py -> Kafka (topic orders, 3 partition) -> consumer.py (Pydantic)
             -> data/stream/valid.jsonl + data/stream/rejected.jsonl
 ```
 
-Diagram lengkap: `pipeline_architecture.png`; model dimensional: `star_schema.png`.
+Diagram lengkap: [pipeline_architecture.png](../pipeline_architecture.png); model dimensional: [star_schema.png](../star_schema.png).
+
+![Arsitektur pipeline](../pipeline_architecture.png)
+
+![Star schema](../star_schema.png)
 
 ## 2. Struktur folder
 
